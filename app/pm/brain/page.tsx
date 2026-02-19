@@ -1,348 +1,441 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-    Brain, Search, Database, Shield, FileText,
-    Network, ArrowRight, CheckCircle, RefreshCw,
-    Users, Briefcase, Code, Lock, GitCommit,
-    ChevronRight, Globe, Layers, Sparkles, X,
-    ChevronLeft, Clock, User, Zap, Cpu, Activity
+    Brain, Search, Network, CheckCircle,
+    Users, Code, GitCommit,
+    ChevronLeft, Cpu, Activity,
+    Upload, FileUp, Plus, Scan, X,
+    Globe, Shield, Zap, Terminal, Server, Database
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-// import PMSidebar from "@/app/pm/components/PMSidebar" // Removed if not needed here or kept if used in layout
 import { BRAIN_DOCS, type BrainDoc } from "@/lib/brain-data"
-import HROpsView from "@/app/pm/brain/components/HROpsView"
 
-// ─── Cosmic Layers ──────────────────────────────────────────────────────────
-const KNOWLEDGE_LAYERS = [
-    {
-        id: "core",
-        title: "Orbital Core",
-        icon: Globe,
-        color: "text-cyan-400",
-        bgColor: "bg-cyan-500/10",
-        borderColor: "border-cyan-500/20",
-        shadow: "shadow-cyan-500/20",
-        stats: "12 Docs · Synced",
-        description: "Mission, Vision, Values, Product Roadmap"
-    },
-    {
-        id: "role",
-        title: "Role Constellation",
-        icon: Users,
-        color: "text-indigo-400",
-        bgColor: "bg-indigo-500/10",
-        borderColor: "border-indigo-500/20",
-        shadow: "shadow-indigo-500/20",
-        stats: "24 Roles · 8 Active",
-        description: "Rubrics, Success Profiles, Historical Outcomes"
-    },
-    {
-        id: "tech",
-        title: "Tech Nebula",
-        icon: Code,
-        color: "text-violet-400",
-        bgColor: "bg-violet-500/10",
-        borderColor: "border-violet-500/20",
-        shadow: "shadow-violet-500/20",
-        stats: "45 Stacks · 12 Constraints",
-        description: "Tech Stack, Architecture, Standards"
-    },
-    {
-        id: "policy",
-        title: "Ops Horizon",
-        icon: Shield,
-        color: "text-fuchsia-400",
-        bgColor: "bg-fuchsia-500/10",
-        borderColor: "border-fuchsia-500/20",
-        shadow: "shadow-fuchsia-500/20",
-        stats: "18 Policies · Updated",
-        description: "HR, Compliance, Performance Frameworks"
-    },
-    {
-        id: "decision",
-        title: "Decision Void",
-        icon: GitCommit,
-        color: "text-rose-400",
-        bgColor: "bg-rose-500/10",
-        borderColor: "border-rose-500/20",
-        shadow: "shadow-rose-500/20",
-        stats: "156 Decisions",
-        description: "Rationale, Pivots, Tradeoffs"
-    }
+// ─── Types ───────────────────────────────────────────────────────────────────
+type IngestionStatus = "idle" | "scanning" | "processing" | "indexed"
+
+// ─── Mock Data for HUD ───────────────────────────────────────────────────────
+const SYSTEM_LOGS = [
+    "[SYSTEM] Neural index re-calibrated (Efficiency: 99.8%)",
+    "[NETWORK] Node 42 connected to sector 7",
+    "[SECURITY] Handshake verifies. Encryption: Quantum-256",
+    "[DATA] Ingesting stream from source: 'HR_POLICY_V4'",
+    "[KERNEL] Memory heap optimization complete",
 ]
 
-export default function CompanyBrainPage() {
-    const [searchQuery, setSearchQuery] = useState("")
-    const [activeLayer, setActiveLayer] = useState<string | null>(null)
-    const [selectedDoc, setSelectedDoc] = useState<BrainDoc | null>(null)
+// ─── Neural Core Component ───────────────────────────────────────────────────
+function NeuralCore({ isActive, pulseSpeed = "normal" }: { isActive: boolean, pulseSpeed?: "normal" | "fast" }) {
+    return (
+        <div className="relative flex items-center justify-center w-[800px] h-[800px]">
+            {/* Core Glow */}
+            <div className={cn(
+                "absolute bg-violet-600/20 blur-[150px] rounded-full transition-all duration-1000",
+                isActive ? "w-[500px] h-[500px] opacity-100" : "w-[300px] h-[300px] opacity-40"
+            )} />
 
-    // Filter docs based on search OR active layer
-    const filteredDocs = useMemo(() => {
-        if (searchQuery) {
-            return BRAIN_DOCS.filter(doc =>
-                doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                doc.snippet.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-        }
-        if (activeLayer) {
-            return BRAIN_DOCS.filter(doc => doc.category === activeLayer)
-        }
-        return []
-    }, [searchQuery, activeLayer])
+            {/* Grid Background Effect */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)] opacity-20 animate-pulse" />
+
+            {/* Orbital Rings - Outer */}
+            <div className="absolute w-[600px] h-[600px] border border-white/[0.03] rounded-full animate-[spin_60s_linear_infinite]" />
+            <div className="absolute w-[550px] h-[550px] border border-dashed border-white/[0.04] rounded-full animate-[spin_40s_linear_infinite_reverse]" />
+
+            {/* Orbital Rings - Inner active */}
+            <div className={cn(
+                "absolute border rounded-full transition-all duration-1000",
+                isActive ? "w-[400px] h-[400px] border-violet-500/30 animate-[spin_10s_linear_infinite]" : "w-[350px] h-[350px] border-white/5 animate-[spin_20s_linear_infinite]"
+            )} />
+
+            {/* Connecting Nodes (Decorative) */}
+            {[...Array(8)].map((_, i) => (
+                <motion.div
+                    key={i}
+                    animate={{
+                        scale: isActive ? [1, 1.2, 1] : 1,
+                        opacity: isActive ? 1 : 0.3
+                    }}
+                    transition={{ duration: 2, delay: i * 0.2, repeat: Infinity }}
+                    className="absolute w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.6)]"
+                    style={{
+                        transform: `rotate(${i * 45}deg) translate(${isActive ? 220 : 180}px) rotate(-${i * 45}deg)`,
+                    }}
+                />
+            ))}
+
+            {/* Central Processor */}
+            <div className={cn(
+                "relative rounded-full flex items-center justify-center shadow-[0_0_100px_rgba(139,92,246,0.5)] z-10 transition-all duration-700",
+                isActive ? "w-48 h-48 bg-[#0A0A0E] border border-violet-500/50" : "w-32 h-32 bg-[#050508] border border-white/10"
+            )}>
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-600/20 to-cyan-600/20 animate-pulse" />
+                <Brain className={cn(
+                    "transition-all duration-700 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.6)]",
+                    isActive ? "w-20 h-20" : "w-12 h-12"
+                )} />
+
+                {/* Data Stream Particles (When Processing) */}
+                {pulseSpeed === "fast" && (
+                    <>
+                        <div className="absolute inset-0 border-2 border-transparent border-t-cyan-400 rounded-full animate-[spin_1s_linear_infinite]" />
+                        <div className="absolute inset-2 border-2 border-transparent border-b-violet-400 rounded-full animate-[spin_1.5s_linear_infinite_reverse]" />
+                    </>
+                )}
+            </div>
+
+            {/* Status Text - Now Floating */}
+            <div className="absolute -bottom-24 text-center">
+                <p className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-mono mb-1">Neural Core Status</p>
+                <p className={cn("text-xs font-bold uppercase tracking-widest", isActive ? "text-emerald-400" : "text-white/50")}>
+                    {isActive ? "Thinking / Processing" : "Standing By"}
+                </p>
+            </div>
+        </div>
+    )
+}
+
+// ─── HUD Components ──────────────────────────────────────────────────────────
+
+function SystemWidget({ label, value, icon: Icon, color }: any) {
+    return (
+        <div className="bg-[#0A0A0E]/50 backdrop-blur border border-white/5 rounded-lg p-3 w-40">
+            <div className="flex items-center gap-2 mb-2">
+                <Icon className={cn("w-3.5 h-3.5", color)} />
+                <span className="text-[10px] text-white/40 uppercase tracking-wider font-mono">{label}</span>
+            </div>
+            <div className="text-white font-mono text-sm">{value}</div>
+        </div>
+    )
+}
+
+function ActivityLog() {
+    return (
+        <div className="w-80 bg-[#0A0A0E]/50 backdrop-blur border border-white/5 rounded-xl p-4 font-mono text-[10px] text-white/50 space-y-2 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-violet-500/50 to-transparent opacity-20" />
+            <div className="uppercase tracking-widest text-white/20 mb-3 text-[9px]">Live Ingestion Stream</div>
+            {SYSTEM_LOGS.map((log, i) => (
+                <div key={i} className="truncate hover:text-white/80 transition-colors cursor-default">
+                    <span className="text-violet-500/50 mr-2">{`>`}</span>
+                    {log}
+                </div>
+            ))}
+            <div className="animate-pulse text-violet-400 mt-2">{`_`}</div>
+        </div>
+    )
+}
+
+// ─── Main Page Component ─────────────────────────────────────────────────────
+export default function CompanyBrainPage() {
+    // State
+    const [docs, setDocs] = useState<BrainDoc[]>(BRAIN_DOCS)
+    const [searchQuery, setSearchQuery] = useState("")
+    const [isIngesting, setIsIngesting] = useState(false)
+    const [ingestionStatus, setIngestionStatus] = useState<IngestionStatus>("idle")
+    const [activeDoc, setActiveDoc] = useState<BrainDoc | null>(null)
+    const [newDocContent, setNewDocContent] = useState("")
+
+    // Ingestion Handler
+    const handleIngest = () => {
+        if (!newDocContent.trim()) return
+
+        setIngestionStatus("scanning")
+
+        // Simulation Sequence
+        setTimeout(() => setIngestionStatus("processing"), 1500)
+        setTimeout(() => {
+            setIngestionStatus("indexed")
+            const newDoc: BrainDoc = {
+                id: `new-${Date.now()}`,
+                title: "New Knowledge Fragment",
+                category: "core",
+                snippet: newDocContent.slice(0, 100) + "...",
+                author: "Admin User",
+                lastUpdated: "Just now",
+                content: newDocContent,
+                tags: ["new", "user-upload"]
+            }
+            setDocs(prev => [newDoc, ...prev])
+            setTimeout(() => {
+                setIngestionStatus("idle")
+                setIsIngesting(false)
+                setNewDocContent("")
+            }, 1000)
+        }, 3500)
+    }
+
+    // Filter Logic
+    const filtered = useMemo(() => {
+        return docs.filter(d =>
+            d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            d.snippet.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+    }, [docs, searchQuery])
 
     return (
-        <>
-            <div className="flex-1 flex flex-col relative overflow-hidden bg-[#030305]">
-                {/* Cosmic Background Effects */}
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay pointer-events-none"></div>
-                <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-violet-600/10 blur-[150px] rounded-full pointer-events-none animate-pulse duration-[8000ms]" />
-                <div className="absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] bg-cyan-600/10 blur-[150px] rounded-full pointer-events-none animate-pulse duration-[12000ms]" />
+        <div className="flex bg-[#030303] h-full overflow-hidden font-sans relative selection:bg-violet-500/30 selection:text-violet-200">
+            {/* ─── Background FX ───────────────────────────────────────────────── */}
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-violet-500/5 blur-[150px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-cyan-500/5 blur-[150px] rounded-full pointer-events-none" />
 
+            {/* ─── Main Content Area ───────────────────────────────────────────── */}
+            <div className="flex-1 flex flex-col relative z-10">
                 {/* Header */}
-                <div className="h-20 flex items-center justify-between px-8 border-b border-white/[0.04] bg-[#030305]/80 backdrop-blur-xl z-10 sticky top-0">
+                <header className="h-20 flex items-center justify-between px-8 border-b border-white/[0.06] bg-[#030303]/80 backdrop-blur-md z-20 sticky top-0">
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-500/20 to-cyan-500/20 border border-white/5 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.2)]">
-                            <Network className="w-5 h-5 text-violet-300" />
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-500/20 to-indigo-500/10 border border-violet-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.15)]">
+                            <Network className="w-5 h-5 text-violet-400" />
                         </div>
                         <div>
-                            <h1 className="text-lg font-bold tracking-tight text-white">Company Brain</h1>
-                            <p className="text-[10px] text-violet-300/60 font-medium tracking-widest uppercase">Version 5.0 · Neural Sync</p>
+                            <h1 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                                NEURAL BRAIN
+                                <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/50 font-mono tracking-wide">v2.0</span>
+                            </h1>
+                            <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono">System Nominal · {docs.length} Nodes Active</p>
+                            </div>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
-                            </span>
-                            <span className="text-[10px] font-bold text-violet-300 uppercase tracking-wider">Live Link</span>
+                        {/* Search Bar */}
+                        <div className="relative group w-64">
+                            <div className="absolute inset-0 bg-violet-500/20 rounded-lg opacity-0 group-focus-within:opacity-100 blur transition-opacity" />
+                            <div className="relative flex items-center bg-[#0A0A0E] border border-white/10 rounded-lg px-3 py-2">
+                                <Search className="w-4 h-4 text-white/40 mr-2" />
+                                <input
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search neural index..."
+                                    className="bg-transparent border-none outline-none text-xs text-white placeholder:text-white/20 w-full"
+                                />
+                            </div>
                         </div>
-                        <Button variant="outline" className="h-9 border-white/10 hover:bg-white/5 text-xs uppercase tracking-wider text-white/60 hover:text-white transition-colors">
-                            <RefreshCw className="w-3.5 h-3.5 mr-2" />
-                            Update
+
+                        <Button
+                            onClick={() => setIsIngesting(true)}
+                            className="bg-white text-black hover:bg-violet-200 border-none shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                        >
+                            <Plus className="w-4 h-4 mr-2" /> Feed Brain
                         </Button>
                     </div>
-                </div>
+                </header>
 
-                {/* Main Layout */}
-                <div className="flex-1 flex overflow-hidden relative z-0">
-                    {/* Center Canvas */}
-                    <div className={cn(
-                        "flex-1 overflow-y-auto transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]",
-                        (activeLayer || searchQuery) ? "w-[60%] lg:w-[65%]" : "w-full"
-                    )}>
-                        <div className="max-w-6xl mx-auto px-8 py-12">
-                            {/* Search */}
-                            <div className="mb-16 relative z-10">
-                                <div className="relative group max-w-2xl mx-auto">
-                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-cyan-600 rounded-2xl opacity-30 group-hover:opacity-60 blur transition duration-500" />
-                                    <div className="relative flex items-center gap-4 bg-[#08080A] border border-white/10 rounded-2xl px-6 py-5 shadow-2xl">
-                                        <Sparkles className="w-5 h-5 text-violet-400" />
-                                        <input
-                                            type="text"
-                                            placeholder="Query the neural network..."
-                                            className="flex-1 bg-transparent text-lg outline-none placeholder:text-white/20 text-white font-medium"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                        />
-                                        {searchQuery && (
-                                            <button onClick={() => setSearchQuery("")} className="p-1 hover:bg-white/10 rounded-full text-white/40 transition-colors">
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
+                <div className="flex-1 flex relative overflow-hidden">
+                    {/* ─── Left Panel: Neural List ─────────────────────────────────── */}
+                    <div className="w-[400px] border-r border-white/[0.06] bg-[#050508]/50 flex flex-col z-20">
+                        <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
+                            <span className="text-xs font-bold text-white/40 uppercase tracking-widest font-mono">Memory Banks</span>
+                            <div className="flex gap-1">
+                                <span className="w-1 h-1 rounded-full bg-white/20" />
+                                <span className="w-1 h-1 rounded-full bg-white/20" />
+                                <span className="w-1 h-1 rounded-full bg-white/20" />
                             </div>
-
-                            {/* Visualization */}
-                            {activeLayer === "policy" ? (
-                                <div className="mb-16 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                                    <HROpsView />
-                                </div>
-                            ) : (
-                                <div className={cn(
-                                    "mb-16 relative flex items-center justify-center transition-all duration-700",
-                                    (activeLayer || searchQuery) ? "h-[300px] scale-90" : "h-[450px]"
-                                )}>
-                                    {/* Neural Core */}
-                                    <div className="relative flex items-center justify-center">
-                                        {/* Core Glow */}
-                                        <div className="absolute w-[300px] h-[300px] bg-violet-600/20 blur-[100px] rounded-full animate-pulse" />
-
-                                        {/* Orbital Rings */}
-                                        <div className="absolute w-[400px] h-[400px] border border-white/[0.03] rounded-full animate-[spin_30s_linear_infinite]" />
-                                        <div className="absolute w-[300px] h-[300px] border border-dashed border-white/[0.05] rounded-full animate-[spin_20s_linear_infinite_reverse]" />
-                                        <div className="absolute w-[200px] h-[200px] border border-violet-500/20 rounded-full animate-[spin_10s_linear_infinite]" />
-
-                                        {/* Central Processor */}
-                                        <div className="relative w-32 h-32 rounded-full bg-[#050508] border border-violet-500/30 flex items-center justify-center shadow-[0_0_50px_rgba(139,92,246,0.3)] z-10 group cursor-pointer hover:scale-105 transition-transform duration-500">
-                                            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-600/20 to-cyan-600/20 animate-pulse" />
-                                            <Brain className="w-12 h-12 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                            {filtered.map((doc, i) => (
+                                <motion.div
+                                    key={doc.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    onClick={() => setActiveDoc(doc)}
+                                    className={cn(
+                                        "p-4 rounded-xl border cursor-pointer transition-all group relative overflow-hidden",
+                                        activeDoc?.id === doc.id
+                                            ? "bg-violet-500/10 border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.1)]"
+                                            : "bg-white/[0.02] border-white/[0.04] hover:bg-white/[0.04] hover:border-white/10"
+                                    )}
+                                >
+                                    {activeDoc?.id === doc.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-500" />}
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h3 className={cn("text-sm font-semibold transition-colors", activeDoc?.id === doc.id ? "text-white" : "text-white/80 group-hover:text-white")}>{doc.title}</h3>
+                                        <span className="text-[10px] text-white/30 font-mono">{doc.lastUpdated}</span>
+                                    </div>
+                                    <p className="text-xs text-white/40 line-clamp-2 leading-relaxed mb-3">{doc.snippet}</p>
+                                    <div className="flex items-center gap-2">
+                                        <div className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 text-[9px] text-white/30 uppercase tracking-wider">
+                                            {doc.category}
                                         </div>
-
-                                        {/* Connecting Nodes (Decorative) */}
-                                        {[...Array(6)].map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="absolute w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)]"
-                                                style={{
-                                                    transform: `rotate(${i * 60}deg) translate(140px) rotate(-${i * 60}deg)`,
-                                                }}
-                                            />
+                                        {doc.tags?.slice(0, 2).map(t => (
+                                            <span key={t} className="text-[9px] text-white/20">#{t}</span>
                                         ))}
                                     </div>
-
-                                    {!activeLayer && !searchQuery && (
-                                        <div className="absolute bottom-0 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
-                                            <p className="text-white/40 text-xs tracking-[0.2em] uppercase font-medium">Neural Architecture Active</p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Layers Grid */}
-                            <div>
-                                <h3 className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-6 text-center">System Layers</h3>
-                                <div className={cn(
-                                    "grid gap-4 transition-all duration-500",
-                                    (activeLayer || searchQuery) ? "grid-cols-2 lg:grid-cols-3" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-5"
-                                )}>
-                                    {KNOWLEDGE_LAYERS.map((layer) => {
-                                        const isActive = activeLayer === layer.id
-                                        return (
-                                            <div
-                                                key={layer.id}
-                                                onClick={() => {
-                                                    setActiveLayer(isActive ? null : layer.id)
-                                                    setSearchQuery("") // Clear search
-                                                }}
-                                                className={cn(
-                                                    "p-6 rounded-2xl border transition-all cursor-pointer group flex flex-col items-center text-center hover:-translate-y-1 duration-300",
-                                                    isActive
-                                                        ? `bg-[#0A0A0C] ${layer.borderColor} shadow-xl ${layer.shadow}`
-                                                        : "bg-white/[0.02] border-white/[0.04] hover:bg-white/[0.04] hover:border-white/10"
-                                                )}
-                                            >
-                                                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-colors mb-4 shadow-lg", layer.bgColor, layer.color)}>
-                                                    <layer.icon className="w-5 h-5" />
-                                                </div>
-                                                <h3 className="text-sm font-bold text-white mb-1 group-hover:text-white transition-colors">{layer.title}</h3>
-                                                <p className="text-[9px] text-white/40 uppercase tracking-wider mb-3">{layer.stats}</p>
-                                                {!activeLayer && !searchQuery && (
-                                                    <p className="text-xs text-white/30 leading-relaxed max-w-[150px]">{layer.description}</p>
-                                                )}
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-                            </div>
+                                </motion.div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Right Slide-over Panel (Doc List) */}
-                    <AnimatePresence>
-                        {(activeLayer || searchQuery) && (
-                            <motion.div
-                                initial={{ x: "100%", opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                exit={{ x: "100%", opacity: 0 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                className="w-[450px] border-l border-white/[0.05] bg-[#050508]/95 backdrop-blur-xl flex flex-col shadow-2xl z-20"
-                            >
-                                <div className="h-20 flex items-center justify-between px-6 border-b border-white/[0.05]">
-                                    <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-                                        {searchQuery ? (
-                                            <><Search className="w-4 h-4 text-white/40" /> Search Results</>
-                                        ) : (
-                                            <><Layers className="w-4 h-4 text-violet-400" /> Layer: {KNOWLEDGE_LAYERS.find(l => l.id === activeLayer)?.title}</>
-                                        )}
-                                    </h2>
-                                    <Button variant="ghost" size="icon" onClick={() => { setActiveLayer(null); setSearchQuery("") }} className="hover:bg-white/5 rounded-full">
-                                        <X className="w-4 h-4 text-white/40 hover:text-white" />
-                                    </Button>
+                    {/* ─── Center: Neural Visualizer or Doc View ──────────────────── */}
+                    <div className="flex-1 relative flex flex-col">
+                        {/* HUD Elements (Only visible when no doc is active) */}
+                        {!activeDoc && (
+                            <div className="absolute inset-0 pointer-events-none z-10 p-8 flex flex-col justify-between">
+                                {/* Top Row HUD */}
+                                <div className="flex justify-between items-start opacity-70">
+                                    <div className="space-y-4">
+                                        <SystemWidget label="Protocol" value="QUANTUM-V2" icon={Shield} color="text-emerald-400" />
+                                        <SystemWidget label="Uptime" value="99.999%" icon={Activity} color="text-blue-400" />
+                                    </div>
+                                    <SystemWidget label="Active Nodes" value={docs.length.toString()} icon={Server} color="text-violet-400" />
                                 </div>
 
-                                <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                                    {filteredDocs.length > 0 ? (
-                                        filteredDocs.map((doc) => (
-                                            <div
-                                                key={doc.id}
-                                                onClick={() => setSelectedDoc(doc)}
-                                                className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.06] hover:border-violet-500/20 transition-all cursor-pointer group"
-                                            >
-                                                <h3 className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors mb-2">{doc.title}</h3>
-                                                <p className="text-xs text-white/50 line-clamp-2 mb-3 leading-relaxed">{doc.snippet}</p>
-                                                <div className="flex items-center gap-4 text-[10px] text-white/30 uppercase tracking-wider">
-                                                    <span className="flex items-center gap-1.5">
-                                                        <Clock className="w-3 h-3 text-white/20" /> {doc.lastUpdated}
-                                                    </span>
-                                                    <span className="flex items-center gap-1.5">
-                                                        <User className="w-3 h-3 text-white/20" /> {doc.author}
-                                                    </span>
+                                {/* Bottom Row HUD */}
+                                <div className="flex justify-between items-end opacity-70">
+                                    <div className="flex gap-4">
+                                        <SystemWidget label="CPU Load" value="12%" icon={Cpu} color="text-cyan-400" />
+                                        <SystemWidget label="Memory" value="4.2TB / 8TB" icon={Database} color="text-indigo-400" />
+                                    </div>
+                                    <ActivityLog />
+                                </div>
+                            </div>
+                        )}
+
+                        <AnimatePresence mode="wait">
+                            {activeDoc ? (
+                                <motion.div
+                                    key="doc-view"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="absolute inset-0 flex flex-col bg-[#050508] z-20"
+                                >
+                                    {/* Doc Header */}
+                                    <div className="h-16 flex items-center justify-between px-8 border-b border-white/[0.06] bg-[#08080A]">
+                                        <div className="flex items-center gap-4">
+                                            <Button variant="ghost" size="icon" onClick={() => setActiveDoc(null)} className="h-8 w-8 rounded-full hover:bg-white/10">
+                                                <ChevronLeft className="w-4 h-4 text-white/60" />
+                                            </Button>
+                                            <div className="h-4 w-px bg-white/10" />
+                                            <h2 className="text-sm font-bold text-white tracking-wide">{activeDoc.title}</h2>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-xs text-white/40 font-mono">ID: {activeDoc.id}</span>
+                                            <Button size="sm" variant="outline" className="border-white/10 bg-white/5 text-xs">Edit Source</Button>
+                                        </div>
+                                    </div>
+
+                                    {/* Doc Content */}
+                                    <div className="flex-1 overflow-y-auto p-12">
+                                        <div className="max-w-3xl mx-auto space-y-8">
+                                            <div className="prose prose-invert prose-p:text-white/70 prose-headings:text-white max-w-none">
+                                                <h1 className="text-3xl font-light tracking-tight mb-8">{activeDoc.title}</h1>
+                                                <div className="flex items-center gap-4 mb-8 text-xs text-white/40 font-mono uppercase tracking-wider border-b border-white/5 pb-8">
+                                                    <span>Author: {activeDoc.author}</span>
+                                                    <span>•</span>
+                                                    <span>Updated: {activeDoc.lastUpdated}</span>
+                                                    <span>•</span>
+                                                    <span>Access: Restricted</span>
+                                                </div>
+                                                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-8 leading-loose text-white/80">
+                                                    <MarkdownRenderer content={activeDoc.content} />
                                                 </div>
                                             </div>
-                                        ))
-                                    ) : (
-                                        <div className="flex flex-col items-center justify-center py-20 text-center">
-                                            <div className="w-12 h-12 rounded-full bg-white/[0.02] flex items-center justify-center mb-4">
-                                                <Search className="w-5 h-5 text-white/20" />
-                                            </div>
-                                            <p className="text-sm text-white/30">No neural data found.</p>
                                         </div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="neural-core"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute inset-0 flex items-center justify-center p-20"
+                                >
+                                    <NeuralCore isActive={isIngesting || !!searchQuery} pulseSpeed={isIngesting ? "fast" : "normal"} />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
-
-                {/* Document Reader Modal */}
-                <AnimatePresence>
-                    {selectedDoc && (
-                        <div className="absolute inset-0 z-50 flex items-center justify-center p-8 bg-black/80 backdrop-blur-md">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                                className="w-full max-w-3xl h-full max-h-[85vh] bg-[#08080A] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden ring-1 ring-violet-500/20"
-                            >
-                                <div className="h-16 flex items-center justify-between px-6 border-b border-white/[0.05] bg-[#0C0C0E]">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-violet-500/10 text-violet-400">
-                                            <FileText className="w-4 h-4" />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-sm font-semibold text-white">{selectedDoc.title}</h2>
-                                            <p className="text-[10px] text-white/40 uppercase tracking-wider">Authored by {selectedDoc.author}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Button variant="ghost" size="sm" onClick={() => setSelectedDoc(null)} className="hover:bg-white/5 text-white/40 hover:text-white">
-                                            <X className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                                <div className="flex-1 overflow-y-auto p-10 font-serif leading-loose text-white/80">
-                                    <div className="prose prose-invert max-w-none prose-p:text-white/70 prose-headings:text-white prose-strong:text-violet-200">
-                                        {selectedDoc.content.split('\n').map((line, i) => {
-                                            if (line.startsWith('# ')) return <h1 key={i} className="text-2xl font-bold text-white mb-6 mt-2 tracking-tight">{line.replace('# ', '')}</h1>
-                                            if (line.startsWith('## ')) return <h2 key={i} className="text-lg font-bold text-violet-100 mb-4 mt-8 flex items-center gap-2"><div className="w-1 h-4 bg-violet-500 rounded-full" />{line.replace('## ', '')}</h2>
-                                            if (line.startsWith('**')) return <p key={i} className="mb-4"><strong className="text-white font-semibold">{line.replace(/\*\*/g, '')}</strong></p>
-                                            if (line.startsWith('1. ') || line.startsWith('- ')) return <li key={i} className="ml-4 mb-2 marker:text-violet-500 text-white/70 pl-2">{line.replace(/^[1-]\. |^- /, '')}</li>
-                                            return <p key={i} className="mb-4 text-white/70">{line}</p>
-                                        })}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-                </AnimatePresence>
-
             </div>
-        </>
+
+            {/* ─── Ingestion Modal ("Feed the Brain") ────────────────────────────── */}
+            <AnimatePresence>
+                {isIngesting && (
+                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="w-[600px] bg-[#0A0A0E] border border-white/10 rounded-3xl shadow-2xl overflow-hidden relative"
+                        >
+                            {/* Ingestion Visuals */}
+                            <div className="h-32 bg-gradient-to-b from-violet-500/10 to-transparent flex items-center justify-center relative overflow-hidden">
+                                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10" />
+                                {ingestionStatus === "idle" && <FileUp className="w-10 h-10 text-white/20" />}
+                                {ingestionStatus === "scanning" && <Scan className="w-10 h-10 text-cyan-400 animate-pulse" />}
+                                {ingestionStatus === "processing" && <Cpu className="w-10 h-10 text-violet-400 animate-spin" />}
+                                {ingestionStatus === "indexed" && <CheckCircle className="w-10 h-10 text-emerald-400 scale-110 duration-300" />}
+                            </div>
+
+                            <div className="p-8">
+                                <h2 className="text-xl font-bold text-white text-center mb-2">Feed Neural Network</h2>
+                                <p className="text-sm text-white/40 text-center mb-8">Upload documents or paste text to expand the company brain.</p>
+
+                                {ingestionStatus === "idle" ? (
+                                    <div className="space-y-4">
+                                        <textarea
+                                            value={newDocContent}
+                                            onChange={(e) => setNewDocContent(e.target.value)}
+                                            placeholder="Paste knowledge fragment here..."
+                                            className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-violet-500/50 resize-none transition-colors"
+                                        />
+                                        <div className="flex gap-3">
+                                            <Button variant="outline" className="flex-1 border-white/10 hover:bg-white/5 text-white/60 h-10">
+                                                <Upload className="w-4 h-4 mr-2" /> Upload File
+                                            </Button>
+                                            <Button onClick={handleIngest} disabled={!newDocContent} className="flex-1 bg-violet-600 hover:bg-violet-500 text-white h-10">
+                                                Process Data
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="py-8 text-center space-y-4">
+                                        <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: "0%" }}
+                                                animate={{ width: ingestionStatus === "processing" ? "60%" : "100%" }}
+                                                className={cn("h-full", ingestionStatus === "indexed" ? "bg-emerald-500" : "bg-violet-500")}
+                                            />
+                                        </div>
+                                        <p className="text-xs text-white/40 font-mono uppercase tracking-widest animate-pulse">
+                                            {ingestionStatus === "scanning" && "Scanning Content..."}
+                                            {ingestionStatus === "processing" && "Neural Indexing..."}
+                                            {ingestionStatus === "indexed" && "Knowledge Integrated"}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-4 right-4 hover:bg-white/5 rounded-full"
+                                onClick={() => setIsIngesting(false)}
+                            >
+                                <X className="w-4 h-4 text-white/40" />
+                            </Button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    )
+}
+
+function MarkdownRenderer({ content }: { content: string }) {
+    const lines = content.split('\n')
+    return (
+        <div className="space-y-4">
+            {lines.map((line, i) => {
+                if (line.startsWith('# ')) return <h3 key={i} className="text-xl font-bold text-white mt-4">{line.replace('# ', '')}</h3>
+                if (line.startsWith('## ')) return <h4 key={i} className="text-lg font-semibold text-violet-200 mt-2">{line.replace('## ', '')}</h4>
+                if (line.trim().startsWith('- ')) return <li key={i} className="ml-4 list-disc marker:text-violet-500 pl-2 text-white/70">{line.replace('- ', '')}</li>
+                return <p key={i} className="text-white/70">{line}</p>
+            })}
+        </div>
     )
 }

@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Comfortaa, Inter } from "next/font/google"
+import { Comfortaa, Inter, Outfit, JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
@@ -16,10 +16,22 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 })
 
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+})
+
 export const metadata: Metadata = {
   title: "FORGE — Proof-first hiring",
   description: "Rank candidates with auditable evidence in under 60 seconds.",
-    generator: 'v0.app'
+  generator: 'v0.app'
 }
 
 export default function RootLayout({
@@ -28,8 +40,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${comfortaa.variable} ${inter.variable} font-sans antialiased`}>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className={`${comfortaa.variable} ${inter.variable} ${outfit.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>

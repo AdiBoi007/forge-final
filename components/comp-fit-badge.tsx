@@ -29,7 +29,7 @@ export function CompFitBadge({ compFit }: CompFitBadgeProps) {
         </TooltipTrigger>
         <TooltipContent side="top" className="max-w-xs">
           <p className="text-sm">{compFit.note}</p>
-          {compFit.xsMultiplier !== 1 && (
+          {compFit.xsMultiplier != null && compFit.xsMultiplier !== 1 && (
             <p className="text-xs text-muted-foreground mt-1">XS adjustment: ×{compFit.xsMultiplier.toFixed(2)}</p>
           )}
         </TooltipContent>

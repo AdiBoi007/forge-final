@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
@@ -16,6 +17,8 @@ import {
     Network,
     Shield,
 } from "lucide-react"
+
+
 
 export default function PMSidebar() {
     const pathname = usePathname()
@@ -36,16 +39,16 @@ export default function PMSidebar() {
     return (
         <div
             className={cn(
-                "flex flex-col py-6 bg-[#050505] border-r border-white/[0.04] shrink-0 z-50 transition-all duration-300 ease-in-out group/sidebar",
-                isExpanded ? "w-64 px-4 items-start" : "w-16 items-center"
+                "flex flex-col py-4 bg-[#121212] border border-white/10 shrink-0 z-50 transition-all duration-300 ease-out group/sidebar m-4 h-fit my-auto rounded-[2.5rem] shadow-2xl relative gap-2",
+                isExpanded ? "w-64 px-4 items-start" : "w-[68px] items-center"
             )}
             onMouseEnter={() => setIsExpanded(true)}
             onMouseLeave={() => setIsExpanded(false)}
         >
             {/* Logo area */}
-            <div className={cn("mb-8 flex items-center gap-3 px-2", isExpanded ? "justify-start w-full" : "justify-center")}>
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-white/10 to-white/5 flex items-center justify-center border border-white/10 hover:border-white/20 transition-colors cursor-pointer shrink-0">
-                    <Brain className="w-5 h-5 text-white/80" />
+            <div className={cn("flex items-center px-0 w-full", isExpanded ? "justify-start px-2 gap-3" : "justify-center")}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 cursor-pointer shrink-0 hover:bg-white/5">
+                    <Image src="/forge-logo.png" alt="Forge Logo" width={32} height={32} className="w-8 h-8 object-contain mix-blend-screen contrast-125" />
                 </div>
                 <div className={cn(
                     "flex flex-col overflow-hidden transition-all duration-300",
@@ -57,7 +60,7 @@ export default function PMSidebar() {
             </div>
 
             {/* Nav Items */}
-            <div className="flex-1 flex flex-col gap-2 w-full">
+            <div className="flex-1 flex flex-col gap-2 w-full items-center justify-center">
                 {navItems.map((item) => {
                     const isActive = item.exact
                         ? pathname === item.href
@@ -68,33 +71,40 @@ export default function PMSidebar() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "h-10 rounded-xl flex items-center transition-all duration-300 relative group",
-                                isExpanded ? "w-full px-3 gap-3 justify-start" : "w-10 mx-auto justify-center",
-                                isActive
-                                    ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-                                    : "text-white/40 hover:text-white hover:bg-white/10"
+                                "h-10 flex items-center transition-all duration-200 relative group w-full",
+                                isExpanded ? "justify-start px-3" : "justify-center"
                             )}
                         >
-                            <item.icon className="w-5 h-5 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
+                            {/* Active Indicator (Left Bar) */}
+                            {isActive && (
+                                <div className={cn(
+                                    "absolute left-0 w-1 h-6 bg-[#FF6B00] rounded-r-full shadow-[0_0_12px_rgba(255,107,0,0.6)] transition-all duration-300",
+                                    isExpanded ? "-left-4" : "left-0"
+                                )} />
+                            )}
+
+                            {/* Icon Wrapper */}
+                            <div className={cn(
+                                "relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200",
+                                isActive ? "text-[#FF6B00]" : "text-white/40 group-hover:text-white group-hover:bg-white/5"
+                            )}>
+                                <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+                            </div>
 
                             {/* Label (Expanded) */}
                             <span className={cn(
-                                "text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300",
-                                isExpanded ? "opacity-100 w-auto translate-x-0" : "opacity-0 w-0 -translate-x-4 absolute"
+                                "text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ml-3",
+                                isExpanded ? "opacity-100 w-auto translate-x-0" : "opacity-0 w-0 -translate-x-4 absolute",
+                                isActive ? "text-white" : "text-white/60 group-hover:text-white"
                             )}>
                                 {item.label}
                             </span>
 
                             {/* Tooltip on Hover (Collapsed Only) */}
                             {!isExpanded && (
-                                <div className="absolute left-14 px-3 py-1.5 bg-[#1A1A1A] border border-white/10 rounded-lg text-xs font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-xl">
+                                <div className="absolute left-16 px-3 py-1.5 bg-[#1A1A1A] border border-white/10 rounded-lg text-xs font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[60] shadow-xl">
                                     {item.label}
                                 </div>
-                            )}
-
-                            {/* Active Indicator (Collapsed Only) */}
-                            {isActive && !isExpanded && (
-                                <div className="absolute -right-2 w-1 h-4 rounded-full bg-white/50 blur-[2px]" />
                             )}
                         </Link>
                     )
@@ -102,33 +112,35 @@ export default function PMSidebar() {
             </div>
 
             {/* Bottom Actions */}
-            <div className={cn("mt-auto flex flex-col gap-2 w-full", isExpanded ? "px-0" : "px-0 items-center")}>
+            <div className={cn("mt-auto flex flex-col gap-2 w-full", isExpanded ? "px-2" : "px-0 items-center")}>
                 <button className={cn(
-                    "h-10 rounded-xl flex items-center text-white/40 hover:text-white hover:bg-white/10 transition-colors",
-                    isExpanded ? "w-full px-3 gap-3 justify-start" : "w-10 justify-center"
+                    "h-10 flex items-center transition-all duration-200 relative group w-full",
+                    isExpanded ? "justify-start px-2" : "justify-center"
                 )}>
-                    <Settings className="w-5 h-5 shrink-0" />
+                    <div className="relative flex items-center justify-center w-10 h-10 rounded-xl text-white/40 group-hover:text-white group-hover:bg-white/5 transition-all">
+                        <Settings className="w-5 h-5" />
+                    </div>
                     <span className={cn(
-                        "text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300",
-                        isExpanded ? "opacity-100 w-auto translate-x-0" : "opacity-0 w-0 -translate-x-4 absolute"
+                        "text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ml-3 text-white/60 group-hover:text-white",
+                        isExpanded ? "opacity-100 w-auto" : "opacity-0 w-0 absolute"
                     )}>
                         Settings
                     </span>
                 </button>
 
                 <div className={cn(
-                    "flex items-center gap-3 p-1 rounded-full transition-all duration-300",
-                    isExpanded ? "bg-white/5 pr-4" : "p-0"
+                    "flex items-center rounded-xl transition-all duration-300",
+                    isExpanded ? "bg-white/5 pr-4 p-1 gap-3" : "p-0 justify-center w-10 h-10"
                 )}>
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 ring-2 ring-black flex items-center justify-center text-[10px] font-bold text-white shrink-0">
-                        AD
+                    <div className="w-8 h-8 rounded-full ring-2 ring-black shrink-0 overflow-hidden relative">
+                        <Image src="/placeholder-user.jpg" alt="User" fill className="object-cover" />
                     </div>
                     <div className={cn(
                         "flex flex-col overflow-hidden transition-all duration-300",
                         isExpanded ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0"
                     )}>
-                        <span className="text-xs font-semibold text-white whitespace-nowrap">Adhiraj Dogra</span>
-                        <span className="text-[10px] text-white/40 whitespace-nowrap">Product Manager</span>
+                        <span className="text-xs font-semibold text-white whitespace-nowrap">Adhiraj</span>
+                        <span className="text-[10px] text-white/40 whitespace-nowrap">PM</span>
                     </div>
                 </div>
             </div>

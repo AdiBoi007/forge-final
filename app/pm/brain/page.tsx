@@ -125,6 +125,63 @@ function ActivityLog() {
     )
 }
 
+// ─── Neural Interface Component (Right Panel) ─────────────────────────────────
+function NeuralInterface() {
+    return (
+        <div className="w-[400px] shrink-0 border-l border-white/[0.06] bg-[#050508]/50 flex flex-col z-20">
+            <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
+                <span className="text-xs font-bold text-white/40 uppercase tracking-widest font-mono">Neural Interface</span>
+                <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] text-emerald-500 font-mono">ONLINE</span>
+                </div>
+            </div>
+
+            {/* Chat History / terminal output */}
+            <div className="flex-1 p-4 overflow-y-auto space-y-4 font-mono text-sm">
+                <div className="flex gap-3">
+                    <div className="w-6 h-6 rounded bg-violet-500/10 flex items-center justify-center shrink-0 border border-violet-500/20">
+                        <Terminal className="w-3 h-3 text-violet-400" />
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-white/60 text-xs">System initialized. Neural index loaded.</p>
+                        <p className="text-white/40 text-[10px]">10:42:05 AM</p>
+                    </div>
+                </div>
+
+                <div className="flex gap-3">
+                    <div className="w-6 h-6 rounded bg-violet-500/10 flex items-center justify-center shrink-0 border border-violet-500/20">
+                        <Brain className="w-3 h-3 text-violet-400" />
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-violet-200 text-xs">Hello Admin. I am ready to process queries regarding the company knowledge base.</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Input Area */}
+            <div className="p-4 border-t border-white/[0.06] bg-[#0A0A0E]">
+                <div className="relative">
+                    <input
+                        className="w-full bg-[#030303] border border-white/10 rounded-lg pl-4 pr-10 py-3 text-sm text-white focus:outline-none focus:border-violet-500/50 placeholder:text-white/20 font-mono transition-colors"
+                        placeholder="Ask the brain..."
+                    />
+                    <div className="absolute right-2 top-2 p-1 rounded hover:bg-white/10 cursor-pointer transition-colors">
+                        <ChevronLeft className="w-4 h-4 text-white/40 rotate-180" />
+                    </div>
+                </div>
+                <div className="flex justify-between items-center mt-3">
+                    <div className="flex gap-2">
+                        <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 text-[9px] text-white/30 uppercase cursor-pointer hover:bg-white/10 transition-colors">Summarize</span>
+                        <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/5 text-[9px] text-white/30 uppercase cursor-pointer hover:bg-white/10 transition-colors">Draft</span>
+                    </div>
+                    <span className="text-[9px] text-white/20 font-mono">AI-MODEL-v2.1</span>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 // ─── Main Page Component ─────────────────────────────────────────────────────
 export default function CompanyBrainPage() {
     // State
@@ -173,16 +230,16 @@ export default function CompanyBrainPage() {
     }, [docs, searchQuery])
 
     return (
-        <div className="flex bg-[#030303] h-full overflow-hidden font-sans relative selection:bg-violet-500/30 selection:text-violet-200">
+        <div className="flex bg-[#030303] h-full w-full overflow-hidden font-sans relative selection:bg-violet-500/30 selection:text-violet-200">
             {/* ─── Background FX ───────────────────────────────────────────────── */}
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none" />
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-violet-500/5 blur-[150px] rounded-full pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-cyan-500/5 blur-[150px] rounded-full pointer-events-none" />
 
             {/* ─── Main Content Area ───────────────────────────────────────────── */}
-            <div className="flex-1 flex flex-col relative z-10">
+            <div className="flex-1 flex flex-col relative z-10 w-full">
                 {/* Header */}
-                <header className="h-20 flex items-center justify-between px-8 border-b border-white/[0.06] bg-[#030303]/80 backdrop-blur-md z-20 sticky top-0">
+                <header className="h-20 flex items-center justify-between px-8 border-b border-white/[0.06] bg-[#030303]/80 backdrop-blur-md z-20 sticky top-0 shrink-0">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-500/20 to-indigo-500/10 border border-violet-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.15)]">
                             <Network className="w-5 h-5 text-violet-400" />
@@ -223,9 +280,9 @@ export default function CompanyBrainPage() {
                     </div>
                 </header>
 
-                <div className="flex-1 flex relative overflow-hidden">
+                <div className="flex-1 flex relative overflow-hidden w-full">
                     {/* ─── Left Panel: Neural List ─────────────────────────────────── */}
-                    <div className="w-[400px] border-r border-white/[0.06] bg-[#050508]/50 flex flex-col z-20">
+                    <div className="w-[400px] shrink-0 border-r border-white/[0.06] bg-[#050508]/50 flex flex-col z-20">
                         <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
                             <span className="text-xs font-bold text-white/40 uppercase tracking-widest font-mono">Memory Banks</span>
                             <div className="flex gap-1">
@@ -269,7 +326,7 @@ export default function CompanyBrainPage() {
                     </div>
 
                     {/* ─── Center: Neural Visualizer or Doc View ──────────────────── */}
-                    <div className="flex-1 relative flex flex-col">
+                    <div className="flex-1 relative flex flex-col min-w-0">
                         {/* HUD Elements (Only visible when no doc is active) */}
                         {!activeDoc && (
                             <div className="absolute inset-0 pointer-events-none z-10 p-8 flex flex-col justify-between">
@@ -349,6 +406,9 @@ export default function CompanyBrainPage() {
                             )}
                         </AnimatePresence>
                     </div>
+
+                    {/* ─── Right Panel: Neural Interface ───────────────────────────── */}
+                    <NeuralInterface />
                 </div>
             </div>
 
